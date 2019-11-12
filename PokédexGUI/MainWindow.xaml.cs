@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PokédexLib.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,12 @@ namespace PokédexGUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Pokédex pokédex;
         public MainWindow()
         {
             InitializeComponent();
+            pokédex = new Pokédex();
+            pokédex.Teams.Add(new Team("The very best like no one ever was"));
         }
     }
 }
