@@ -1,6 +1,6 @@
 ﻿namespace PokédexLib.DTO
 {
-    public class SpritesDTO
+    public class SpritesDto
     {
         public string back_default { get; set; }
         public object back_female { get; set; }

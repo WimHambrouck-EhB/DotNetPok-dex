@@ -1,6 +1,6 @@
 ﻿namespace PokédexLib.DTO
 {
-    public class TypeDTO
+    public class TypeDto
     {
         public int slot { get; set; }
         public TypeInfo type { get; set; }

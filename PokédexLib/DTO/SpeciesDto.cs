@@ -1,6 +1,6 @@
 ﻿namespace PokédexLib.DTO
 {
-    public class SpeciesDTO
+    public class SpeciesDto
     {
         public string name { get; set; }
         public string url { get; set; }

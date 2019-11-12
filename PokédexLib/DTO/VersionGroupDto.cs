@@ -1,6 +1,6 @@
 ﻿namespace PokédexLib.DTO
 {
-    public class VersionGroupDTO
+    public class VersionGroupDto
     {
         public string name { get; set; }
         public string url { get; set; }
