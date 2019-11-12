@@ -1,6 +1,6 @@
 ﻿namespace PokédexLib.DTO
 {
-    public class StatsDTO
+    public class StatsDto
     {
         public int base_stat { get; set; }
         public int effort { get; set; }
