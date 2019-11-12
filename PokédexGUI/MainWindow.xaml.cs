@@ -22,6 +22,7 @@ namespace PokédexGUI
     public partial class MainWindow : Window
     {
         private Pokédex pokédex;
+        private Pokémon activePokémon;
         public MainWindow()
         {
             InitializeComponent();
@@ -50,6 +51,15 @@ namespace PokédexGUI
         private void BtnNext_Click(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("next");
+        }
+
+        private async void BtnSearch_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(TxtSearch.Text))
+            {
+                MessageBox.Show("Gelieve de naam of een id van een Pokémon op te geven...", "Ongeldige invoer", MessageBoxButton.OK, MessageBoxImage.Error);
+                TxtSearch.Focus();
+            }
         }
     }
 }

@@ -8,7 +8,7 @@
         Title="MainWindow" Height="403" Width="327">
     <Grid>
         <TextBox x:Name="TxtSearch" Margin="10,25,55,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="20" ToolTip="Type a Pokémon name or number..."/>
-        <Button x:Name="BtnSearch" Content="_Search" Margin="0,25,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="39" IsDefault="True"/>
+        <Button x:Name="BtnSearch" Content="_Search" Margin="0,25,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="39" IsDefault="True" Click="BtnSearch_Click"/>
         <GroupBox x:Name="GrpPkmn" Header="MyPkmn" Margin="10,50,11,49" Visibility="Visible">
             <Grid Height="265">
                 <Image HorizontalAlignment="Left" Height="96" Margin="10,10,0,0" VerticalAlignment="Top" Width="96"/>
@@ -27,8 +27,8 @@
         </Menu>
         <Button x:Name="BtnAdd" Content="_Add to team" HorizontalAlignment="Left" Margin="10,0,0,24" Height="20" VerticalAlignment="Bottom"/>
         <Button x:Name="BtnRemove" Content="_Remove from team" HorizontalAlignment="Left" Margin="85,0,0,24" VerticalAlignment="Bottom"/>
-        <Button x:Name="BtnNext" Content="_Next &gt;" Margin="0,0,9,24" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="40" Click="BtnNext_Click"/>
-        <Button x:Name="BtnPrev" Content="&lt; _Prev" Margin="0,0,55,24" VerticalAlignment="Bottom" RenderTransformOrigin="0.672,0.688" HorizontalAlignment="Right" Width="38" Click="BtnPrev_Click" />
+        <Button x:Name="BtnNext" Content="_Next &gt;" Margin="0,0,9,24" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="45" Click="BtnNext_Click"/>
+        <Button x:Name="BtnPrev" Content="&lt; _Prev" Margin="0,0,59,24" VerticalAlignment="Bottom" RenderTransformOrigin="0.672,0.688" HorizontalAlignment="Right" Width="45" Click="BtnPrev_Click" />
 
     </Grid>
 </Window>
