@@ -11,14 +11,14 @@
         <Button x:Name="BtnSearch" Content="_Search" Margin="0,25,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="39" IsDefault="True" Click="BtnSearch_Click"/>
         <GroupBox x:Name="GrpPkmn" Header="MyPkmn" Margin="10,50,11,49" Visibility="Visible">
             <Grid Height="265">
-                <Image HorizontalAlignment="Left" Height="96" Margin="10,10,0,0" VerticalAlignment="Top" Width="96"/>
+                <Image x:Name="ImgPkmn" HorizontalAlignment="Left" Height="96" Margin="10,10,0,0" VerticalAlignment="Top" Width="96"/>
                 <Label Content="HP:" HorizontalAlignment="Left" Margin="109,10,0,0" VerticalAlignment="Top"/>
                 <Label Content="Attack:" HorizontalAlignment="Left" Margin="109,36,0,0" VerticalAlignment="Top"/>
                 <Label Content="Defense:" HorizontalAlignment="Left" Margin="109,62,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.11,-0.123"/>
                 <Label x:Name="LblDefense" Content="0" HorizontalAlignment="Left" Margin="169,62,0,0" VerticalAlignment="Top"/>
                 <Label x:Name="LblAttack" Content="0" HorizontalAlignment="Left" Margin="169,36,0,0" VerticalAlignment="Top"/>
                 <Label x:Name="LblHP" Content="0" HorizontalAlignment="Left" Margin="169,10,0,0" VerticalAlignment="Top"/>
-                <TextBlock Margin="10,120,10,10" Text="This pokémon likes to pokémon with other pokémon to pokémon their pokémon with their pokémon" TextWrapping="Wrap"/>
+                <TextBlock x:Name="TxtDescription" Margin="10,120,10,10" Text="Beschrijving" TextWrapping="Wrap"/>
                 <Label x:Name="LblTypes" Content="Types: Water, Grass" Margin="109,88,10,0" VerticalAlignment="Top"/>
             </Grid>
         </GroupBox>
