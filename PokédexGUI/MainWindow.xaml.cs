@@ -135,13 +135,17 @@ namespace PokédexGUI
 
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
-            if(currentTeam.RemovePokémon(currentPokémon))
+            var result = MessageBox.Show($"Are you sure you want to remove {currentPokémon.Name} from your team?", "Remove Pokémon", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
             {
-                UpdateMenu();
-            }
-            else
-            {
-                MessageBox.Show("This Pokémon is not in this team.", "Pokémon not removed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (currentTeam.RemovePokémon(currentPokémon))
+                {
+                    UpdateMenu();
+                }
+                else
+                {
+                    MessageBox.Show("This Pokémon is not in this team.", "Pokémon not removed", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
         }
 
