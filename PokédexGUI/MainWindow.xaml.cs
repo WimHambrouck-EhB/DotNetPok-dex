@@ -28,10 +28,10 @@ namespace PokédexGUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Pokédex pokédex;
+        private readonly Pokédex pokédex;
         private Pokémon currentPokémon;
         private Team currentTeam;
-        private readonly WebClient pokemonClient, pokemonSpeciesClient, imageClient;
+        private readonly WebClient pokemonClient, pokemonSpeciesClient;
         private const string API_URL = "https://pokeapi.co/api/v2/";
         public MainWindow()
         {
@@ -123,13 +123,39 @@ namespace PokédexGUI
             TxtDescription.Text = currentPokémon.Description;
         }
 
+        private void UpdateMenu()
+        {
+            MenuPkmn.Items.Clear();
+            foreach (var pkmn in currentTeam.AllPokémon)
+            {
+                MenuItem menuItem = new MenuItem();
+                menuItem.Header = pkmn.Name;
+                menuItem.Click += MenuPokémonClick;
+                MenuPkmn.Items.Add(menuItem);
+            }
+        }
 
+        private void MenuPokémonClick(object sender, RoutedEventArgs e)
+        {
+            var menuItem = sender as MenuItem;
+            /* volgende lijn code gebruikt een null-coalescing assignment operator (??=) en een null-conditional operator (?.)
+             * Meer info hierover:
+             * https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-coalescing-operator
+             * https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/member-access-operators#null-conditional-operators--and-
+             */
+            currentPokémon ??= currentTeam.AllPokémon.Find(x => x.Name == menuItem?.Name.ToString());
+            UpdateGUI();
+        }
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (currentTeam.AddPokémon(currentPokémon) == false)
+                if (currentTeam.AddPokémon(currentPokémon))
+                {
+                    UpdateMenu();
+                }
+                else
                 {
                     MessageBox.Show("This Pokémon is already part of this team.", "Pokémon not added", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
@@ -142,7 +168,11 @@ namespace PokédexGUI
 
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
-            if(currentTeam.RemovePokémon(currentPokémon) == false)
+            if(currentTeam.RemovePokémon(currentPokémon))
+            {
+                UpdateMenu();
+            }
+            else
             {
                 MessageBox.Show("This Pokémon is not in this team.", "Pokémon not removed", MessageBoxButton.OK, MessageBoxImage.Warning);
             }

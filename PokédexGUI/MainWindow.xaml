@@ -23,7 +23,7 @@
             </Grid>
         </GroupBox>
         <Menu Height="20" VerticalAlignment="Top">
-            <MenuItem Header="Pokémon"/>
+            <MenuItem x:Name="MenuPkmn" Header="Pokémon"/>
         </Menu>
         <Button x:Name="BtnAdd" Content="_Add to team" HorizontalAlignment="Left" Margin="10,0,0,24" Height="20" VerticalAlignment="Bottom" Click="BtnAdd_Click" IsEnabled="False"/>
         <Button x:Name="BtnRemove" Content="_Remove from team" HorizontalAlignment="Left" Margin="85,0,0,24" VerticalAlignment="Bottom" IsEnabled="False" Click="BtnRemove_Click"/>

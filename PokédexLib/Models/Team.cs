@@ -1,11 +1,13 @@
 ﻿using PokédexLib.Exceptions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PokédexLib.Models
 {
     public class Team
     {
         public string Name { get; set; }
+        public List<Pokémon> AllPokémon => MyPokémon.ToList();
         private readonly HashSet<Pokémon> MyPokémon;
         private const int MAX_POKÉMON = 6;
 
