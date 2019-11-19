@@ -2,23 +2,13 @@
 using PokédexLib.DTO;
 using PokédexLib.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using PokédexLib.Extensions;
-using System.IO;
 using PokédexLib.Exceptions;
 
 namespace PokédexGUI
@@ -60,7 +50,6 @@ namespace PokédexGUI
 
         private async void BtnSearch_Click(object sender, RoutedEventArgs e)
         {
-
             var invoer = TxtSearch.Text;
             if (string.IsNullOrWhiteSpace(invoer))
             {
@@ -119,7 +108,7 @@ namespace PokédexGUI
             /* volgende lijn code gebruikt een null-coalescing assignment operator (??=) en een null-conditional operator (?.)
              * Meer info hierover:
              * https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/null-coalescing-operator
-             * https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/member-access-operators#null-conditional-operators--and-
+             * https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/member-access-operators#null-conditional-operators--and%2D
              */
             currentPokémon ??= currentTeam.AllPokémon.Find(x => x.Name == menuItem?.Name.ToString());
             UpdateGUI();
