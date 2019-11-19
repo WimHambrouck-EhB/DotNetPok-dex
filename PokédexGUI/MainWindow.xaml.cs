@@ -19,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using PokédexLib.Extensions;
 using System.IO;
+using PokédexLib.Exceptions;
 
 namespace PokédexGUI
 {
@@ -28,13 +29,15 @@ namespace PokédexGUI
     public partial class MainWindow : Window
     {
         private Pokédex pokédex;
-        private Pokémon activePokémon;
+        private Pokémon currentPokémon;
+        private Team currentTeam;
         private readonly WebClient pokemonClient, pokemonSpeciesClient, imageClient;
         private const string API_URL = "https://pokeapi.co/api/v2/";
         public MainWindow()
         {
             pokédex = new Pokédex();
             pokédex.Teams.Add(new Team("The very best like no one ever was"));
+            currentTeam = pokédex.Teams.First();
             pokemonClient = new WebClient
             {
                 BaseAddress = API_URL + "pokemon/"
@@ -43,7 +46,6 @@ namespace PokédexGUI
             {
                 BaseAddress = API_URL + "pokemon-species/"
             };
-            imageClient = new WebClient();
 
             InitializeComponent();
             GrpPkmn.Visibility = Visibility.Collapsed;
@@ -54,7 +56,6 @@ namespace PokédexGUI
         {
             pokemonClient.Dispose();
             pokemonSpeciesClient.Dispose();
-            imageClient.Dispose();
             base.OnClosed(e);
         }
 
@@ -90,55 +91,61 @@ namespace PokédexGUI
             }
             else
             {
-                /*
-                 * De volgende code gaat wachten tot alle tasks voltooid zijn.
-                 * Voor een implementatie met WhenAny, zie: 
-                 * https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/start-multiple-async-tasks-and-process-them-as-they-complete
-                 */
                 GUIEnabled(false);
                 var pkmnTask = Task.Run(() => pokemonClient.DownloadString(invoer));
                 var speciesTask = Task.Run(() => pokemonSpeciesClient.DownloadString(invoer));
                 await Task.WhenAll(pkmnTask, speciesTask);
                 var pkmnDto = JsonConvert.DeserializeObject<PokémonDto>(pkmnTask.Result);           
                 var speciesDto = JsonConvert.DeserializeObject<PokémonSpeciesDto>(speciesTask.Result);
-                activePokémon = new Pokémon()
+                currentPokémon = new Pokémon()
                 {
                     Name = pkmnDto.name.FormatAsName(),
                     Attack = pkmnDto.stats.Where(stat => stat.stat.name == "attack").Select(stat => stat.base_stat).First(),
                     Defense = pkmnDto.stats.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).First(),
                     HP = pkmnDto.stats.Where(stat => stat.stat.name == "hp").Select(stat => stat.base_stat).First(),
                     Types = pkmnDto.types.Select(type => type.type.name).ToList(),
-                    Description = speciesDto.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text).First()
+                    Description = speciesDto.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text).First(),
+                    ImageUrl = pkmnDto.sprites.front_default
                 };
                 UpdateGUI();
                 GUIEnabled(true);
-                var imgData = await Task.Run(() => imageClient.DownloadData(pkmnDto.sprites.front_default));
-                UpdateImage(imgData);
             }
-        }
-
-        private void UpdateImage(byte[] imgData)
-        {
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.StreamSource = new MemoryStream(imgData);
-            image.EndInit();
-            ImgPkmn.Source = image;
         }
 
         private void UpdateGUI()
         {
-            GrpPkmn.Header = activePokémon.Name;
-            LblAttack.Content = activePokémon.Attack;
-            LblDefense.Content = activePokémon.Defense;
-            LblHP.Content = activePokémon.HP;
-            LblTypes.Content = string.Format("Type(s): {0}", string.Join(", ", activePokémon.Types));
-            TxtDescription.Text = activePokémon.Description;
+            GrpPkmn.Header = currentPokémon.Name;
+            ImgPkmn.Source = new BitmapImage(new Uri(currentPokémon.ImageUrl));
+            LblAttack.Content = currentPokémon.Attack;
+            LblDefense.Content = currentPokémon.Defense;
+            LblHP.Content = currentPokémon.HP;
+            LblTypes.Content = string.Format("Type(s): {0}", string.Join(", ", currentPokémon.Types));
+            TxtDescription.Text = currentPokémon.Description;
         }
+
+
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                if (currentTeam.AddPokémon(currentPokémon) == false)
+                {
+                    MessageBox.Show("This Pokémon is already part of this team.", "Pokémon not added", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (TeamIsFullException ex)
+            {
+                MessageBox.Show(ex.Message, "Pokémon not added", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
 
+        private void BtnRemove_Click(object sender, RoutedEventArgs e)
+        {
+            if(currentTeam.RemovePokémon(currentPokémon) == false)
+            {
+                MessageBox.Show("This Pokémon is not in this team.", "Pokémon not removed", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void GUIEnabled(bool isEnabled)

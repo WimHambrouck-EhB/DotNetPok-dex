@@ -17,9 +17,9 @@ namespace PokédexLib.Models
 
         public bool AddPokémon(Pokémon pokémon)
         {
-            if(MyPokémon.Count > MAX_POKÉMON)
+            if (MyPokémon.Count >= MAX_POKÉMON)
             {
-                throw new TeamIsFullException($"Een team mag maximaal {MAX_POKÉMON} Pokémon bevatten.");
+                throw new TeamIsFullException($"A team cannot contain more than {MAX_POKÉMON} Pokémon.");
             }
 
             return MyPokémon.Add(pokémon);

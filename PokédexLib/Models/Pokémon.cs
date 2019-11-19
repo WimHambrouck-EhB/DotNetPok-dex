@@ -11,6 +11,7 @@ namespace PokédexLib.Models
         public int Defense { get; set; }
         public List<string> Types { get; set; }
         public string Description { get; set; }
+        public string ImageUrl { get; set; }
 
         public override bool Equals(object obj)
         {
