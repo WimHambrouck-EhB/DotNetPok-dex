@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using PokédexLib.Extensions;
 using PokédexLib.Exceptions;
+using PokédexLib;
 
 namespace PokédexGUI
 {
@@ -116,21 +117,23 @@ namespace PokédexGUI
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                if (currentTeam.AddPokémon(currentPokémon))
-                {
-                    UpdateMenu();
-                }
-                else
-                {
-                    MessageBox.Show("This Pokémon is already part of this team.", "Pokémon not added", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            catch (TeamIsFullException ex)
-            {
-                MessageBox.Show(ex.Message, "Pokémon not added", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
+            var c = new PokéCache("https://pokeapi.co/api/v2/pokemon/{0}");
+            c.RefreshCache();
+            //try
+            //{
+            //    if (currentTeam.AddPokémon(currentPokémon))
+            //    {
+            //        UpdateMenu();
+            //    }
+            //    else
+            //    {
+            //        MessageBox.Show("This Pokémon is already part of this team.", "Pokémon not added", MessageBoxButton.OK, MessageBoxImage.Warning);
+            //    }
+            //}
+            //catch (TeamIsFullException ex)
+            //{
+            //    MessageBox.Show(ex.Message, "Pokémon not added", MessageBoxButton.OK, MessageBoxImage.Warning);
+            //}
         }
 
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
