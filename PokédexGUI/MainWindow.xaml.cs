@@ -49,7 +49,6 @@ namespace PokédexGUI
 
             InitializeComponent();
             GrpPkmn.Visibility = Visibility.Collapsed;
-            InitShortcuts();
         }
 
         protected override void OnClosed(EventArgs e)
@@ -57,27 +56,6 @@ namespace PokédexGUI
             pokemonClient.Dispose();
             pokemonSpeciesClient.Dispose();
             base.OnClosed(e);
-        }
-
-        private void InitShortcuts()
-        {
-            var routedCommandCtrlLeft = new RoutedCommand();
-            routedCommandCtrlLeft.InputGestures.Add(new KeyGesture(Key.Left, ModifierKeys.Control));
-            CommandBindings.Add(new CommandBinding(routedCommandCtrlLeft, BtnPrev_Click));
-
-            var routedCommandCtrlRight = new RoutedCommand();
-            routedCommandCtrlRight.InputGestures.Add(new KeyGesture(Key.Right, ModifierKeys.Control));
-            CommandBindings.Add(new CommandBinding(routedCommandCtrlRight, BtnNext_Click));
-        }
-
-        private void BtnPrev_Click(object sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("prev");
-        }
-
-        private void BtnNext_Click(object sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("next");
         }
 
         private async void BtnSearch_Click(object sender, RoutedEventArgs e)
@@ -185,8 +163,6 @@ namespace PokédexGUI
             GrpPkmn.Visibility = (isEnabled) ? Visibility.Visible : Visibility.Hidden;
             BtnAdd.IsEnabled = isEnabled;
             BtnRemove.IsEnabled = isEnabled;
-            BtnNext.IsEnabled = isEnabled;
-            BtnPrev.IsEnabled = isEnabled;
         }
     }
 }
