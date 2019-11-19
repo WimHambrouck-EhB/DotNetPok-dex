@@ -25,7 +25,7 @@
         <Menu Height="20" VerticalAlignment="Top">
             <MenuItem Header="Pokémon"/>
         </Menu>
-        <Button x:Name="BtnAdd" Content="_Add to team" HorizontalAlignment="Left" Margin="10,0,0,24" Height="20" VerticalAlignment="Bottom"/>
+        <Button x:Name="BtnAdd" Content="_Add to team" HorizontalAlignment="Left" Margin="10,0,0,24" Height="20" VerticalAlignment="Bottom" Click="BtnAdd_Click"/>
         <Button x:Name="BtnRemove" Content="_Remove from team" HorizontalAlignment="Left" Margin="85,0,0,24" VerticalAlignment="Bottom"/>
         <Button x:Name="BtnNext" Content="_Next &gt;" Margin="0,0,9,24" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="45" Click="BtnNext_Click"/>
         <Button x:Name="BtnPrev" Content="&lt; _Prev" Margin="0,0,59,24" VerticalAlignment="Bottom" RenderTransformOrigin="0.672,0.688" HorizontalAlignment="Right" Width="45" Click="BtnPrev_Click" />

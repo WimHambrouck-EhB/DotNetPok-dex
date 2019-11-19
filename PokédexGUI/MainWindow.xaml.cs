@@ -18,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using PokédexLib.Extensions;
+using System.IO;
 
 namespace PokédexGUI
 {
@@ -27,23 +28,22 @@ namespace PokédexGUI
     public partial class MainWindow : Window
     {
         private Pokédex pokédex;
-        private PokémonDto activePokémon;
-        private PokémonSpeciesDto activeSpecies;
-        private readonly WebClient pokemonEndpoint, pokemonSpeciesEndpoint;
+        private Pokémon activePokémon;
+        private readonly WebClient pokemonClient, pokemonSpeciesClient, imageClient;
         private const string API_URL = "https://pokeapi.co/api/v2/";
         public MainWindow()
         {
             pokédex = new Pokédex();
             pokédex.Teams.Add(new Team("The very best like no one ever was"));
-            pokemonEndpoint = new WebClient
+            pokemonClient = new WebClient
             {
-                BaseAddress = API_URL + "pokemon"
+                BaseAddress = API_URL + "pokemon/"
             };
-            pokemonSpeciesEndpoint = new WebClient
+            pokemonSpeciesClient = new WebClient
             {
-                BaseAddress = API_URL + "pokemon-species"
+                BaseAddress = API_URL + "pokemon-species/"
             };
-
+            imageClient = new WebClient();
 
             InitializeComponent();
             GrpPkmn.Visibility = Visibility.Collapsed;
@@ -52,8 +52,9 @@ namespace PokédexGUI
 
         protected override void OnClosed(EventArgs e)
         {
-            pokemonEndpoint.Dispose();
-            pokemonSpeciesEndpoint.Dispose();
+            pokemonClient.Dispose();
+            pokemonSpeciesClient.Dispose();
+            imageClient.Dispose();
             base.OnClosed(e);
         }
 
@@ -89,30 +90,58 @@ namespace PokédexGUI
             }
             else
             {
-                // ter info: voor een betere implementatie van meerdere simultane tasks, check:
-                // https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/start-multiple-async-tasks-and-process-them-as-they-complete
-                EnableGUI(false);
-                var t1 = Task.Run(() => pokemonEndpoint.DownloadString($"pokemon/{invoer}"));
-                var t2 = Task.Run(() => pokemonSpeciesEndpoint.DownloadString($"pokemon-species/{invoer}"));
-                await Task.WhenAll(t1, t2);
-                activePokémon = JsonConvert.DeserializeObject<PokémonDto>(t1.Result);
-                activeSpecies = JsonConvert.DeserializeObject<PokémonSpeciesDto>(t2.Result);
+                /*
+                 * De volgende code gaat wachten tot alle tasks voltooid zijn.
+                 * Voor een implementatie met WhenAny, zie: 
+                 * https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/start-multiple-async-tasks-and-process-them-as-they-complete
+                 */
+                GUIEnabled(false);
+                var pkmnTask = Task.Run(() => pokemonClient.DownloadString(invoer));
+                var speciesTask = Task.Run(() => pokemonSpeciesClient.DownloadString(invoer));
+                await Task.WhenAll(pkmnTask, speciesTask);
+                var pkmnDto = JsonConvert.DeserializeObject<PokémonDto>(pkmnTask.Result);           
+                var speciesDto = JsonConvert.DeserializeObject<PokémonSpeciesDto>(speciesTask.Result);
+                activePokémon = new Pokémon()
+                {
+                    Name = pkmnDto.name.FormatAsName(),
+                    Attack = pkmnDto.stats.Where(stat => stat.stat.name == "attack").Select(stat => stat.base_stat).First(),
+                    Defense = pkmnDto.stats.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).First(),
+                    HP = pkmnDto.stats.Where(stat => stat.stat.name == "hp").Select(stat => stat.base_stat).First(),
+                    Types = pkmnDto.types.Select(type => type.type.name).ToList(),
+                    Description = speciesDto.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text).First()
+                };
                 UpdateGUI();
-                EnableGUI(true);
+                GUIEnabled(true);
+                var imgData = await Task.Run(() => imageClient.DownloadData(pkmnDto.sprites.front_default));
+                UpdateImage(imgData);
             }
+        }
+
+        private void UpdateImage(byte[] imgData)
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.StreamSource = new MemoryStream(imgData);
+            image.EndInit();
+            ImgPkmn.Source = image;
         }
 
         private void UpdateGUI()
         {
-            GrpPkmn.Header = activePokémon.name.FormatAsName();
-            LblAttack.Content = activePokémon.stats.Where(stat => stat.stat.name == "attack").Select(stat => stat.base_stat).First();
-            LblDefense.Content = activePokémon.stats.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).First();
-            LblHP.Content = activePokémon.stats.Where(stat => stat.stat.name == "hp").Select(stat => stat.base_stat).First();
-            LblTypes.Content = string.Format("Type(s): {0}", string.Join(", ", activePokémon.types.Select(type => type.type.name)));
-            TxtDescription.Text = activeSpecies.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text).First();
+            GrpPkmn.Header = activePokémon.Name;
+            LblAttack.Content = activePokémon.Attack;
+            LblDefense.Content = activePokémon.Defense;
+            LblHP.Content = activePokémon.HP;
+            LblTypes.Content = string.Format("Type(s): {0}", string.Join(", ", activePokémon.Types));
+            TxtDescription.Text = activePokémon.Description;
         }
 
-        private void EnableGUI(bool isEnabled)
+        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void GUIEnabled(bool isEnabled)
         {
             TxtSearch.IsEnabled = isEnabled;
             BtnSearch.IsEnabled = isEnabled;
