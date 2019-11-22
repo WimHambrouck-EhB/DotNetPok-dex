@@ -23,19 +23,20 @@ namespace PokédexGUI
         private Pokémon currentPokémon;
         private Team currentTeam;
         private readonly WebClient pokemonClient, pokemonSpeciesClient;
-        private const string API_URL = "https://pokeapi.co/api/v2/";
+        private readonly PokéCache pokéCache;
         public MainWindow()
         {
+            pokéCache = PokéCache.Instance;
             pokédex = new Pokédex();
             pokédex.Teams.Add(new Team("The very best like no one ever was"));
             currentTeam = pokédex.Teams.First();
             pokemonClient = new WebClient
             {
-                BaseAddress = API_URL + "pokemon/"
+                BaseAddress = PokéCache.ApiUrl + "pokemon/"
             };
             pokemonSpeciesClient = new WebClient
             {
-                BaseAddress = API_URL + "pokemon-species/"
+                BaseAddress = PokéCache.ApiUrl + "pokemon-species/"
             };
 
             InitializeComponent();
@@ -59,12 +60,42 @@ namespace PokédexGUI
             }
             else
             {
+                PokémonDto pkmnDto;
+                PokémonSpeciesDto speciesDto;
                 GUIEnabled(false);
-                var pkmnTask = Task.Run(() => pokemonClient.DownloadString(invoer));
-                var speciesTask = Task.Run(() => pokemonSpeciesClient.DownloadString(invoer));
-                await Task.WhenAll(pkmnTask, speciesTask);
-                var pkmnDto = JsonConvert.DeserializeObject<PokémonDto>(pkmnTask.Result);           
-                var speciesDto = JsonConvert.DeserializeObject<PokémonSpeciesDto>(speciesTask.Result);
+
+                //haal pokémoninfo uit cache
+                if (int.TryParse(invoer, out int pokéId))
+                {
+                    // gebruiker heeft nummer ingevoerd
+                    pkmnDto = pokéCache.PokémonDtos.Where(x => x?.id == pokéId).FirstOrDefault();
+                }
+                else
+                {
+                    // gebruiker heeft naam ingevoerd
+                    pkmnDto = pokéCache.PokémonDtos.Where(x => x?.name == invoer.ToLower()).FirstOrDefault();
+                }
+
+                // indien cache geen info over gezochte pokémon bevat, downloaden...
+                if (pkmnDto != null)
+                {
+                    speciesDto = pokéCache.PokémonSpeciesDtos[pkmnDto.id];
+                }
+                else
+                {
+                    // download info van API
+                    var pkmnTask = Task.Run(() => pokemonClient.DownloadString(invoer));
+                    var speciesTask = Task.Run(() => pokemonSpeciesClient.DownloadString(invoer));
+                    await Task.WhenAll(pkmnTask, speciesTask);
+
+                    // deserialiseren van JSON string naar DTO object
+                    pkmnDto = JsonConvert.DeserializeObject<PokémonDto>(pkmnTask.Result);
+                    speciesDto = JsonConvert.DeserializeObject<PokémonSpeciesDto>(speciesTask.Result);
+
+                    // DTO opslaan in cache voor hergebruik
+                    pokéCache.PokémonDtos[pkmnDto.id] = pkmnDto;
+                }
+
                 currentPokémon = new Pokémon()
                 {
                     Name = pkmnDto.name.FormatAsName(),
@@ -72,7 +103,7 @@ namespace PokédexGUI
                     Defense = pkmnDto.stats.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).First(),
                     HP = pkmnDto.stats.Where(stat => stat.stat.name == "hp").Select(stat => stat.base_stat).First(),
                     Types = pkmnDto.types.Select(type => type.type.name).ToList(),
-                    Description = speciesDto.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text).First(),
+                    Description = speciesDto?.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text).First(),
                     ImageUrl = pkmnDto.sprites.front_default
                 };
                 UpdateGUI();
@@ -136,17 +167,18 @@ namespace PokédexGUI
 
         private void BtnRemove_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show($"Are you sure you want to remove {currentPokémon.Name} from your team?", "Remove Pokémon", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
+            if (currentTeam.AllPokémon.Contains(currentPokémon))
             {
-                if (currentTeam.RemovePokémon(currentPokémon))
+                var result = MessageBox.Show($"Are you sure you want to remove {currentPokémon.Name} from your team?", "Remove Pokémon", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
                 {
+                    currentTeam.RemovePokémon(currentPokémon);
                     UpdateMenu();
-                }
-                else
-                {
-                    MessageBox.Show("This Pokémon is not in this team.", "Pokémon not removed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
+                } 
+            }
+            else
+            {
+                MessageBox.Show("This Pokémon is not on the current team.", "Pokémon not removed", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

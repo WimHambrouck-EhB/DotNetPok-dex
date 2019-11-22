@@ -9,27 +9,50 @@ using System.Threading.Tasks;
 
 namespace PokédexLib
 {
+    /// <summary>
+    /// Singleton klasse die een cache van PokémonDTO's bevat.
+    /// Meer info over Singletons in C#: https://csharpindepth.com/articles/singleton
+    /// </summary>
     public class PokéCache
     {
-        public PokémonDto[] PokémonCache { get; set; }
-        private readonly string APIUrl;
+        /// <summary>
+        /// Type <see cref="Lazy{T}"/> zorgt voor "lazy initialization". M.a.w.: er wordt pas een object aangemaakt op het moment dat het effectief nodig is.
+        /// </summary>
+        private static readonly Lazy<PokéCache> pokéCache = new Lazy<PokéCache>(() => new PokéCache());
 
-        public PokéCache(string apiUrl)
+        /// <summary>
+        /// Instance Property geeft een instantie terug van onze cache. Als deze nog niet bestaat zal <see cref="Lazy{T}"/> er voor zorgen dat er een instantie wordt aangemaakt,
+        /// anders wordt de bestaande instantie (Value) teruggegeven.
+        /// </summary>
+        public static PokéCache Instance { get { return pokéCache.Value; } }
+        public PokémonDto[] PokémonDtos { get; private set; }
+        public PokémonSpeciesDto[] PokémonSpeciesDtos { get; private set; }
+
+        public static string ApiUrl => "https://pokeapi.co/api/v2/";
+        private const int amountToCache = 10;
+        private const int amountOfPkmn = 964; // er zitten 964 Pokémon in de API
+
+        /// <summary>
+        /// Private ctor om externe instanties van onze singleton klasse te vermijden
+        /// </summary>
+        private PokéCache()
         {
-            APIUrl = apiUrl;
-            PokémonCache = new PokémonDto[150];
+            PokémonDtos = new PokémonDto[amountOfPkmn + 1];
+            PokémonSpeciesDtos = new PokémonSpeciesDto[amountOfPkmn + 1];
+            DownloadPokémon();
         }
 
-        public void RefreshCache()
+        private async void DownloadPokémon()
         {
-            Parallel.For(1, 15, async i => PokémonCache[i] = await GetPokémon(i));
-        }
-
-        private async Task<PokémonDto> GetPokémon(int i)
-        {
-            WebClient webClient = new WebClient();
-            var result = await Task.Run(() => webClient.DownloadString(string.Format(APIUrl, i)));
-            return JsonConvert.DeserializeObject<PokémonDto>(result);
+            await Task.Run(() => Parallel.For(1, amountToCache + 1, i =>
+            {
+                WebClient webClient = new WebClient();
+                var pkmn = webClient.DownloadString($"{ApiUrl}pokemon/{i}");
+                var species = webClient.DownloadString($"{ApiUrl}pokemon-species/{i}");
+                PokémonDtos[i] = JsonConvert.DeserializeObject<PokémonDto>(pkmn);
+                PokémonSpeciesDtos[i] = JsonConvert.DeserializeObject<PokémonSpeciesDto>(species);
+                webClient.Dispose();
+            }));
         }
     }
 }
