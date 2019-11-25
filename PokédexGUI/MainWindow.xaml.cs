@@ -98,7 +98,7 @@ namespace PokédexGUI
 
                 currentPokémon = new Pokémon()
                 {
-                    Name = pkmnDto.name.FormatAsName(),
+                    Name = pkmnDto.name.FirstToUpper(),
                     Attack = pkmnDto.stats.Where(stat => stat.stat.name == "attack").Select(stat => stat.base_stat).First(),
                     Defense = pkmnDto.stats.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).First(),
                     HP = pkmnDto.stats.Where(stat => stat.stat.name == "hp").Select(stat => stat.base_stat).First(),
