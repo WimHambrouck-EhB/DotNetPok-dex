@@ -2,11 +2,13 @@
 using PokédexLibrary;
 using PokédexLibrary.DTO;
 using PokédexLibrary.Exceptions;
+using PokédexLibrary.Extensions;
 using PokédexLibrary.Models;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -98,7 +100,6 @@ namespace PokédexGUI
 
                 TextInfo ti = CultureInfo.CurrentCulture.TextInfo;
 
-
                 currentPokémon = new Pokémon()
                 {
                     Name = ti.ToTitleCase(pkmnDto.name),
@@ -106,7 +107,7 @@ namespace PokédexGUI
                     Defense = pkmnDto.stats.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).First(),
                     HP = pkmnDto.stats.Where(stat => stat.stat.name == "hp").Select(stat => stat.base_stat).First(),
                     Types = pkmnDto.types.Select(type => type.type.name).ToList(),
-                    Description = speciesDto?.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text).First(),
+                    Description = speciesDto?.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text.Unescape()).First(),
                     ImageUrl = pkmnDto.sprites.front_default
                 };
                 UpdateGUI();
