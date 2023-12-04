@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PokédexGUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="403" Width="327">
+        Title="Pokédex" Height="403" Width="327">
     <Grid>
         <TextBox x:Name="TxtSearch" Margin="10,25,55,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="20" ToolTip="Type a Pokémon name or number..."/>
         <Button x:Name="BtnSearch" Content="_Search" Margin="0,25,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="39" IsDefault="True" Click="BtnSearch_Click"/>

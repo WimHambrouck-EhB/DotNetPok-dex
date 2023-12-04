@@ -57,7 +57,7 @@ namespace PokédexGUI
             var invoer = TxtSearch.Text;
             if (string.IsNullOrWhiteSpace(invoer))
             {
-                MessageBox.Show("Gelieve de naam of een id van een Pokémon op te geven...", "Ongeldige invoer", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("PLease enter a valid name or number of a Pokémon...", "Invalid input", MessageBoxButton.OK, MessageBoxImage.Error);
                 TxtSearch.Focus();
             }
             else
