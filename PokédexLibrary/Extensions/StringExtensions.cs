@@ -11,6 +11,9 @@ namespace PokédexLibrary.Extensions
         /// </summary>
         public static string Unescape(this string str)
         {
+            if (string.IsNullOrWhiteSpace(str))
+                return str;
+
             return str.Replace(Environment.NewLine, " ").Replace('\n', ' ').Replace('\f', ' ');
         }
     }
