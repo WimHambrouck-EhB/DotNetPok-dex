@@ -1,16 +1,16 @@
 ﻿using Newtonsoft.Json;
-using PokédexLib.DTO;
-using PokédexLib.Models;
+using PokédexLibrary;
+using PokédexLibrary.DTO;
+using PokédexLibrary.Exceptions;
+using PokédexLibrary.Models;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using PokédexLib.Extensions;
-using PokédexLib.Exceptions;
-using PokédexLib;
 
 namespace PokédexGUI
 {
@@ -96,9 +96,12 @@ namespace PokédexGUI
                     pokéCache.PokémonDtos[pkmnDto.id] = pkmnDto;
                 }
 
+                TextInfo ti = CultureInfo.CurrentCulture.TextInfo;
+
+
                 currentPokémon = new Pokémon()
                 {
-                    Name = pkmnDto.name.FirstToUpper(),
+                    Name = ti.ToTitleCase(pkmnDto.name),
                     Attack = pkmnDto.stats.Where(stat => stat.stat.name == "attack").Select(stat => stat.base_stat).First(),
                     Defense = pkmnDto.stats.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).First(),
                     HP = pkmnDto.stats.Where(stat => stat.stat.name == "hp").Select(stat => stat.base_stat).First(),
