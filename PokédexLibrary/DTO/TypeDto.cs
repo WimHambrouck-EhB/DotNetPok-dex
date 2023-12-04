@@ -2,7 +2,7 @@
 {
     public class TypeDto
     {
-        public int slot { get; set; }
+        public int? slot { get; set; }
         public TypeInfo type { get; set; }
         public class TypeInfo
         {

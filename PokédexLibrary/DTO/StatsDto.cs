@@ -2,8 +2,8 @@
 {
     public class StatsDto
     {
-        public int base_stat { get; set; }
-        public int effort { get; set; }
+        public int? base_stat { get; set; }
+        public int? effort { get; set; }
         public StatInfo stat { get; set; }
         public class StatInfo
         {

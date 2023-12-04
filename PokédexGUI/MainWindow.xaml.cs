@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 
 namespace PokédexGUI
@@ -66,7 +67,7 @@ namespace PokédexGUI
                 PokémonSpeciesDto speciesDto;
                 GUIEnabled(false);
 
-                //haal pokémoninfo uit cache
+                // check of pokémoninfo bestaat in cache
                 if (int.TryParse(invoer, out int pokéId))
                 {
                     // gebruiker heeft nummer ingevoerd
@@ -78,12 +79,12 @@ namespace PokédexGUI
                     pkmnDto = pokéCache.PokémonDtos.Where(x => x?.name == invoer.ToLower()).FirstOrDefault();
                 }
 
-                // indien cache geen info over gezochte pokémon bevat, downloaden...
+                // cache hit
                 if (pkmnDto != null)
                 {
                     speciesDto = pokéCache.PokémonSpeciesDtos[pkmnDto.id];
                 }
-                else
+                else // cache miss, info downloaden...
                 {
                     // download info van API
                     var pkmnTask = Task.Run(() => pokemonClient.DownloadString(invoer));
@@ -96,6 +97,7 @@ namespace PokédexGUI
 
                     // DTO opslaan in cache voor hergebruik
                     pokéCache.PokémonDtos[pkmnDto.id] = pkmnDto;
+                    pokéCache.PokémonSpeciesDtos[pkmnDto.id] = speciesDto;
                 }
 
                 TextInfo ti = CultureInfo.CurrentCulture.TextInfo;
@@ -104,11 +106,11 @@ namespace PokédexGUI
                 {
                     Id = pkmnDto.id,
                     Name = ti.ToTitleCase(pkmnDto.name),
-                    Attack = pkmnDto.stats.Where(stat => stat.stat.name == "attack").Select(stat => stat.base_stat).First(),
-                    Defense = pkmnDto.stats.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).First(),
-                    HP = pkmnDto.stats.Where(stat => stat.stat.name == "hp").Select(stat => stat.base_stat).First(),
-                    Types = pkmnDto.types.Select(type => type.type.name).ToList(),
-                    Description = speciesDto?.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text.Unescape()).First(),
+                    Attack = pkmnDto.stats?.Where(stat => stat.stat.name == "attack").Select(stat => stat.base_stat).FirstOrDefault() ?? -1,
+                    Defense = pkmnDto.stats?.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).FirstOrDefault() ?? -1,
+                    HP = pkmnDto.stats?.Where(stat => stat.stat.name == "hp").Select(stat => stat.base_stat).FirstOrDefault() ?? -1,
+                    Types = pkmnDto.types?.Select(type => type.type.name).ToList(),
+                    Description = speciesDto.flavor_text_entries.Where(x => x.language.name == "en").Select(x => x.flavor_text.Unescape()).FirstOrDefault(),
                     ImageUrl = pkmnDto.sprites.front_default
                 };
                 UpdateGUI();
@@ -119,12 +121,23 @@ namespace PokédexGUI
         private void UpdateGUI()
         {
             GrpPkmn.Header = currentPokémon.Name;
-            ImgPkmn.Source = new BitmapImage(new Uri(currentPokémon.ImageUrl));
-            LblAttack.Content = currentPokémon.Attack;
-            LblDefense.Content = currentPokémon.Defense;
-            LblHP.Content = currentPokémon.HP;
-            LblTypes.Content = string.Format("Type(s): {0}", string.Join(", ", currentPokémon.Types));
-            TxtDescription.Text = currentPokémon.Description;
+            
+            if(currentPokémon.ImageUrl != null)
+                ImgPkmn.Source = new BitmapImage(new Uri(currentPokémon.ImageUrl));
+
+            LblAttack.Content = currentPokémon.Attack == -1 ? "N/A" : currentPokémon.Attack.ToString();
+            LblDefense.Content = currentPokémon.Defense == -1 ? "N/A" : currentPokémon.Defense.ToString();
+            LblHP.Content = currentPokémon.HP == -1 ? "N/A" : currentPokémon.HP.ToString();
+
+            if(currentPokémon.Types != null)
+            {
+                LblTypes.Content = string.Join(", ", currentPokémon.Types);
+            } else
+            {
+                LblTypes.Content = "N/A";
+            }
+
+            TxtDescription.Text = currentPokémon.Description ?? "No description available.";
         }
 
         private void UpdateMenu()
@@ -161,7 +174,7 @@ namespace PokédexGUI
                 }
                 else
                 {
-                    MessageBox.Show("This Pokémon is already part of this team.", "Pokémon not added", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show($"{currentPokémon.Name} is already part of this team.", "Pokémon not added", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (TeamIsFullException ex)
@@ -183,7 +196,7 @@ namespace PokédexGUI
             }
             else
             {
-                MessageBox.Show("This Pokémon is not on the current team.", "Pokémon not removed", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"{currentPokémon.Name} is not on the current team.{Environment.NewLine}You can add them using the \"Add to team\" button.", "Pokémon not removed", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -191,7 +204,7 @@ namespace PokédexGUI
         {
             TxtSearch.IsEnabled = isEnabled;
             BtnSearch.IsEnabled = isEnabled;
-            GrpPkmn.Visibility = (isEnabled) ? Visibility.Visible : Visibility.Hidden;
+            GrpPkmn.Visibility = isEnabled ? Visibility.Visible : Visibility.Hidden;
             BtnAdd.IsEnabled = isEnabled;
             BtnRemove.IsEnabled = isEnabled;
         }
