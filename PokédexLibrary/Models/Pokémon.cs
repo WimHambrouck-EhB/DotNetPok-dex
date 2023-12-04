@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PokédexLibrary.Models
 {
     public class Pokémon
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public List<Move> Moves { get; set; }
         public int HP { get; set; }
@@ -16,12 +18,12 @@ namespace PokédexLibrary.Models
         public override bool Equals(object obj)
         {
             return obj is Pokémon pokémon &&
-                   Name == pokémon.Name;
+                   Id == pokémon.Id;
         }
 
         public override int GetHashCode()
         {
-            return -1386946022 + EqualityComparer<string>.Default.GetHashCode(Name);
+            return HashCode.Combine(Id);
         }
     }
 }

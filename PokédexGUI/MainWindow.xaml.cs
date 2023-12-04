@@ -102,6 +102,7 @@ namespace PokédexGUI
 
                 currentPokémon = new Pokémon()
                 {
+                    Id = pkmnDto.id,
                     Name = ti.ToTitleCase(pkmnDto.name),
                     Attack = pkmnDto.stats.Where(stat => stat.stat.name == "attack").Select(stat => stat.base_stat).First(),
                     Defense = pkmnDto.stats.Where(stat => stat.stat.name == "defense").Select(stat => stat.base_stat).First(),
