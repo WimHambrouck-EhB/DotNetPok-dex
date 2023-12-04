@@ -18,7 +18,7 @@ namespace PokédexLibrary
 
         public static string ApiUrl => "https://pokeapi.co/api/v2/";
         private const int amountToCache = 10;
-        private const int amountOfPkmn = 964; // er zitten 964 Pokémon in de API
+        private const int amountOfPkmn = 1017; // er zitten 1017 Pokémon in de API
 
 
         static PokéCache() { }
